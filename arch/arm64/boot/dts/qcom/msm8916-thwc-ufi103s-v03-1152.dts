@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0-only
+#include "msm8916-thwc-ufi103s-v03.dts"
+
+/* Experimental OPPs, existing supply unchanged; no voltage qualification. */
+&cpu_opp_table {
+	opp-1152000000 { opp-hz = /bits/ 64 <1152000000>; };
+};

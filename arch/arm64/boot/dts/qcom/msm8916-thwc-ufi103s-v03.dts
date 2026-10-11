@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/* UFI103S V03: shared board mapping; 998 MHz previous build booted on this device. */
+#include "msm8916-thwc-ufi001c.dts"
+
+/ {
+	model = "UFI103S_V03 / ufi-103x 4G Modem Stick";
+	compatible = "thwc,ufi001c", "qcom,msm8916";
+
+	leds {
+		sim-sel {
+			label = "sim:sel";
+			gpios = <&tlmm 2 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+		sim-en {
+			label = "sim:en";
+			gpios = <&tlmm 1 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+		sim-sel2 {
+			label = "sim:sel2";
+			gpios = <&tlmm 0 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+		sim-en2 {
+			label = "sim:en2";
+			gpios = <&tlmm 3 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+	};
+};
+
+/* These GPIOs must have one owner: userspace selects SIM through gpio-leds. */
+&mpss {
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-names;
+};
+
+&tlmm {
+	/delete-node/ sim-ctrl-default-state;
+};

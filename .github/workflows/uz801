@@ -1,0 +1,59 @@
+name: Build kernel DTB for msm8916-yiming-uz801v3
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'arch/arm64/boot/dts/qcom/msm8916-yiming-uz801v3.dts'
+
+jobs:
+  build-dtb:
+    name: Build DTB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential bc bison flex libssl-dev libelf-dev dwarves ccache \
+            git python3 python3-distutils gcc-aarch64-linux-gnu device-tree-compiler
+
+      - name: Show git info
+        run: |
+          git --version
+          echo "Commit: $(git rev-parse --short HEAD)"
+
+      - name: Set environment
+        run: echo "ARCH=arm64" >> $GITHUB_ENV
+             echo "CROSS_COMPILE=aarch64-linux-gnu-" >> $GITHUB_ENV
+
+      - name: Prepare kernel config
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [ -f .config ]; then
+            echo ".config found in repository, using make olddefconfig"
+            make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+          else
+            echo "No .config found — using defconfig for arm64"
+            make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig
+          fi
+
+      - name: Build DTBs
+        working-directory: ${{ github.workspace }}
+        run: |
+          make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- dtbs
+
+      - name: List built DTBs
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "Looking for the requested DTB"
+          find arch/arm64/boot/dts -type f -name '*.dtb' -print || true
+
+      - name: Upload DTB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: msm8916-yiming-uz801v3-dtb
+          path: arch/arm64/boot/dts/qcom/msm8916-yiming-uz801v3.dtb
